@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>APSA Day 2026 — Attendance</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:       #0c1a2e;
+      --gold:       #c9a84c;
+      --gold-light: #e8c97a;
+      --cream:      #f5f0e8;
+      --white:      #ffffff;
+      --text:       #1a2538;
+      --muted:      #6b7a8d;
+      --border:     #ddd6c8;
+    }
+
+    html, body { min-height: 100%; background: var(--navy); }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 32px 16px 60px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 20%, rgba(201,168,76,0.08) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 80%, rgba(201,168,76,0.05) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+
+    @keyframes pageIn {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      width: 100%;
+      max-width: 500px;
+      position: relative;
+      z-index: 1;
+      animation: pageIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .card-accent {
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--gold), var(--gold-light), var(--gold), transparent);
+      border-radius: 2px 2px 0 0;
+    }
+
+    .card-inner {
+      background: var(--white);
+      border-radius: 0 0 6px 6px;
+      overflow: hidden;
+      box-shadow:
+        0 2px 0 rgba(201,168,76,0.3),
+        0 24px 80px rgba(0,0,0,0.5),
+        0 8px 32px rgba(0,0,0,0.3);
+    }
+
+
+    .header-logo-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 18px;
+      position: relative;
+    }
+
+    .header-logo-wrap::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.12) 40%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .header-logo-img {
+      width: 110px;
+      height: 110px;
+      object-fit: contain;
+      position: relative;
+    }
+    /* ── Header ── */
+    .header {
+      background: var(--navy);
+      padding: 32px 36px 28px;
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .header::after {
+      content: '';
+      position: absolute;
+      right: -30px; top: -30px;
+      width: 140px; height: 140px;
+      border: 1px solid rgba(201,168,76,0.12);
+      border-radius: 50%;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      right: 10px; top: 10px;
+      width: 90px; height: 90px;
+      border: 1px solid rgba(201,168,76,0.08);
+      border-radius: 50%;
+    }
+
+    .header-eyebrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .eyebrow-line { height: 1px; width: 28px; background: var(--gold); opacity: 0.6; }
+
+    .eyebrow-text {
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 500;
+    }
+
+    .header-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 32px;
+      font-weight: 300;
+      color: var(--white);
+      line-height: 1.15;
+      margin-bottom: 6px;
+    }
+
+    .header-title em { font-style: italic; color: var(--gold-light); }
+
+    .header-meta {
+      font-size: 11px;
+      color: rgba(255,255,255,0.38);
+      letter-spacing: 0.06em;
+      margin-top: 8px;
+    }
+
+    .header-meta span { color: rgba(255,255,255,0.2); margin: 0 6px; }
+
+    /* ── Body ── */
+    .body { padding: 32px 36px 36px; }
+
+    .section-label {
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* ── Fields ── */
+    .fields { margin-bottom: 24px; }
+    .field { margin-bottom: 16px; }
+
+    .field label {
+      display: block;
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 7px;
+      font-weight: 500;
+    }
+
+    .field input,
+    .field textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 11px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--cream);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+
+    .field textarea {
+      resize: vertical;
+      min-height: 110px;
+      line-height: 1.6;
+    }
+
+    .field input:focus,
+    .field textarea:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+      background: var(--white);
+    }
+
+    .field input::placeholder,
+    .field textarea::placeholder { color: #b0bac6; }
+
+    /* ── Divider ── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 24px 0;
+    }
+
+    /* ── Submit ── */
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: var(--navy);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      font-weight: 500;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 24px;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.2s, box-shadow 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-submit::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 40%, rgba(201,168,76,0.15));
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background: #162340;
+      box-shadow: 0 4px 20px rgba(12,26,46,0.4);
+    }
+
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .spinner {
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Success ── */
+    .success {
+      display: none;
+      padding: 48px 36px 44px;
+      text-align: center;
+    }
+
+    .success.visible { display: block; }
+
+    .success-ring {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0c1a2e, #1a3052);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+      box-shadow: 0 0 0 8px rgba(201,168,76,0.1), 0 4px 20px rgba(0,0,0,0.15);
+    }
+
+    .success-ring svg {
+      width: 26px; height: 26px;
+      stroke: var(--gold-light); stroke-width: 2.5;
+      fill: none; stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    .success-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 26px;
+      font-weight: 300;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+
+    .success-name {
+      font-size: 14px;
+      color: var(--gold);
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      margin-bottom: 16px;
+    }
+
+    .success-body {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 320px;
+      margin: 0 auto;
+    }
+
+    .success-divider {
+      width: 40px; height: 1px;
+      background: var(--gold);
+      opacity: 0.4;
+      margin: 24px auto;
+    }
+
+    .success-badge {
+      display: inline-block;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 16px;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      margin-top: 28px;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      color: rgba(255,255,255,0.18);
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="card-accent"></div>
+    <div class="card-inner">
+
+      <!-- Header -->
+      <div class="header">
+        <div class="header-eyebrow">
+          <div class="eyebrow-line"></div>
+          <div class="eyebrow-text">Academy of Prosthodontics SA</div>
+        </div>
+        <div class="header-title">APSA <em>Day</em> 2026</div>
+        <div class="header-meta">
+          Wednesday, 01 April 2026
+          <span>·</span>
+          Lord Charles Hotel
+        </div>
+      </div>
+
+      <!-- Form body -->
+      <div class="body" id="formBody">
+
+        <div class="section-label">Delegate Information</div>
+
+        <form id="attendanceForm">
+          <!-- FormSubmit config -->
+          <input type="hidden" name="_subject"  value="APSA Day 2026 - Completed" />
+          <input type="hidden" name="_captcha"  value="false" />
+          <input type="hidden" name="_template" value="table" />
+          <input type="hidden" name="Status" value="Attendance Confirmed" />
+
+          <div class="fields">
+            <div class="field">
+              <label for="firstName">First Name</label>
+              <input type="text" id="firstName" name="First Name" placeholder="e.g. Sarah" autocomplete="given-name" />
+            </div>
+            <div class="field">
+              <label for="surname">Surname</label>
+              <input type="text" id="surname" name="Surname" placeholder="e.g. Mitchell" autocomplete="family-name" />
+            </div>
+            <div class="field">
+              <label for="dpNumber">DP Number</label>
+              <input type="text" id="dpNumber" name="DP Number" placeholder="e.g. 1234567" inputmode="text" />
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="section-label">Comment</div>
+
+          <div class="fields">
+            <div class="field">
+              <label for="comment">Tell us about your experience at APSA Day 2026</label>
+              <textarea id="comment" name="Comment" placeholder="Share your thoughts, highlights, or feedback…"></textarea>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-submit" id="submitBtn">
+            Confirm Attendance
+          </button>
+        </form>
+      </div>
+
+      <!-- Success screen -->
+      <div class="success" id="successScreen">
+        <div class="success-ring">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="success-title">Attendance Recorded</div>
+        <div class="success-name" id="successName"></div>
+        <p class="success-body">
+          Thank you for registering your attendance at APSA Day 2026.
+        </p>
+        <div class="success-divider"></div>
+        <div class="success-badge">APSA Day 2026 — Completed</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">Academy of Prosthodontics South Africa &nbsp;·&nbsp; 2026</div>
+
+  <script>
+    // ── Form submit via FormSubmit AJAX ──
+    const form        = document.getElementById('attendanceForm');
+    const submitBtn   = document.getElementById('submitBtn');
+    const formBody    = document.getElementById('formBody');
+    const successScr  = document.getElementById('successScreen');
+    const successName = document.getElementById('successName');
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const first = document.getElementById('firstName').value.trim();
+      const last  = document.getElementById('surname').value.trim();
+      const dp    = document.getElementById('dpNumber').value.trim();
+
+      if (!first || !last || !dp) {
+        alert('Please complete all fields before submitting.');
+        return;
+      }
+
+      // Loading state
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner"></span>Submitting…';
+
+      try {
+        const formData = new FormData(form);
+        const res = await fetch('https://formsubmit.co/ajax/academyofprosthodonticssa@gmail.com', {
+          method:  'POST',
+          body:    formData,
+          headers: { 'Accept': 'application/json' }
+        });
+
+        const json = await res.json();
+
+        if (json.success === 'true' || json.success === true) {
+          formBody.style.display = 'none';
+          successName.textContent = 'Dr. ' + first + ' ' + last;
+          successScr.classList.add('visible');
+        } else {
+          throw new Error('FormSubmit returned failure');
+        }
+      } catch (err) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Confirm Attendance';
+        alert('Something went wrong. Please try again or contact the organiser.');
+        console.error(err);
+      }
+    });
+  </script>
+
+</body>
+</html>
